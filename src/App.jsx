@@ -3,9 +3,10 @@ import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { EditTodo } from './components/EditComponent'
 import { FaEdit } from "react-icons/fa";
-import { Button } from 'react-bootstrap';
+import  Button from 'react-bootstrap/Button';
 import { FaDeleteLeft } from 'react-icons/fa6';
 import { host } from './config';
+import { Spinner } from 'react-bootstrap';
 
 function App() {
   const [todos, setTodos] = useState([])
@@ -15,10 +16,13 @@ function App() {
   const [dueTime, setDueTime] = useState('')
   const [selectedTodo, setSelectedTodo] = useState('')
   const [showEdit, setShowEdit] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const [addTask, setAddTask] = useState(false)
 
   const addTodo = async (e) => {
     e.preventDefault();
-  
+    setAddTask(true)
     const newTodo = {
       title,
       description,
@@ -38,6 +42,7 @@ function App() {
   
       if (!res.ok) {
         alert('Could not add todo');
+        setAddTask(false)
         return;
       }
   
@@ -52,11 +57,14 @@ function App() {
       console.error('Error adding todo:', error);
       alert('Could not add todo');
     }
+
+    setAddTask(false)
   };
   
 
 
   const deleteTodo = async (id) => {
+    setDeleting(true)
     try {
       const res = await fetch(`${host}/api/todos/${id}`, { method: 'DELETE',
         headers: {
@@ -64,6 +72,7 @@ function App() {
         }});
       if (res.status !== 204) {
         alert("Couldn't delete todo")
+        setDeleting(false)
         return;
       }
       
@@ -71,6 +80,7 @@ function App() {
     }catch(err){
       console.log(err)
     }
+    setDeleting(false)
   };
 
     
@@ -121,7 +131,7 @@ function App() {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/todos');
+        const res = await fetch(`${host}/api/todos`);
         if (!res.ok) {
           throw new Error('Failed to fetch todos');
         }
@@ -183,9 +193,9 @@ function App() {
           />
         </div>
 
-        <button type="submit">
-          Add Task
-        </button>
+        <Button  disabled={addTask} type="submit">
+          {!addTask ? 'Add Task' : <Spinner />}
+        </Button>
       </form>
 
       <div className="todo-list">
@@ -225,7 +235,7 @@ function App() {
 
          
               <Button variant="primary " onClick={()=> showEditTodo(todo)}><FaEdit /></Button>
-              <Button variant="dark mx-1" onClick={() => deleteTodo(todo.id)} ><FaDeleteLeft /></Button>  
+              <Button disabled={deleting} variant="dark mx-1" onClick={() => deleteTodo(todo.id)} >{!deleting ?<FaDeleteLeft />: <Spinner />}</Button>  
 
 
             </div>

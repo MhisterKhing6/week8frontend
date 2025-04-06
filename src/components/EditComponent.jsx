@@ -3,12 +3,14 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form  from 'react-bootstrap/Form';
 import { host } from '../config';
+import  Spinner  from 'react-bootstrap/Spinner';
 
 function EditTodo({showEdit, selectedTodo, setShowEdit, setTodos, todos}) {
   const [show, setShow] = useState(false);
   const [title, setTitle] = useState(selectedTodo.title)
   const [description, setDescription] = useState(selectedTodo.description)
   const [dueTime, setDueTime] = useState(selectedTodo.dueTime)
+  const [updating, setUpdating] = useState(false)
 
   const handleClose = () => setShowEdit(false);
 
@@ -29,6 +31,7 @@ function EditTodo({showEdit, selectedTodo, setShowEdit, setTodos, todos}) {
 
   const updateStatus = async (e) => {
     e.preventDefault()
+    setUpdating(true)
     selectedTodo.title = title
     selectedTodo.description = description
     selectedTodo.dueTime = dueTime
@@ -44,6 +47,7 @@ function EditTodo({showEdit, selectedTodo, setShowEdit, setTodos, todos}) {
 
     if (!res.ok) {
       alert('Could not updateTodo todo');
+      setUpdating(false)
       return;
     }
 
@@ -52,6 +56,7 @@ function EditTodo({showEdit, selectedTodo, setShowEdit, setTodos, todos}) {
       todo.id === selectedTodo.id ? selectedTodo : todo
     ))
     alert("Updated")
+    setUpdating(false)
     setShowEdit(false)
 
   }
@@ -87,8 +92,8 @@ function EditTodo({showEdit, selectedTodo, setShowEdit, setTodos, todos}) {
           <Form.Control type='datetime-local' value={dueTime} onChange={val => setDueTime(val.target.value)}/>
       </Form.Group>
 
-      <Button variant="primary" type="submit">
-        Update
+      <Button variant="primary" type="submit" disabled={updating}>
+        {!updating ? "Update" : <Spinner />}
       </Button>
     </Form>
         </Modal.Body>
